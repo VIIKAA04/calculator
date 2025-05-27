@@ -18,7 +18,7 @@
     button { padding: 10px; background: #008000; color: white; border: none; border-radius: 5px; cursor: pointer; }
     .error { color: red; font-size: 12px; margin-top: -5px; margin-bottom: 5px; display: none; }
     
-    /* Стиль кнопки GitHub из второго примера */
+    /* Стиль кнопки GitHub */
     #githubContainer {
       text-align: center;
       margin: 20px auto;
@@ -195,6 +195,20 @@
       e.preventDefault();
       deferredPrompt = e;
       installButton.style.display = 'block';
+      
+      // Автоматически показываем подсказку об установке через 3 секунды
+      setTimeout(() => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+              console.log('Пользователь принял предложение об установке');
+              installButton.style.display = 'none';
+            }
+            deferredPrompt = null;
+          });
+        }
+      }, 3000);
     });
     
     installButton.addEventListener('click', async () => {
@@ -205,6 +219,14 @@
           installButton.style.display = 'none';
         }
         deferredPrompt = null;
+      }
+    });
+    
+    // Проверяем, запущено ли приложение как PWA
+    window.addEventListener('load', () => {
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        console.log('Запущено как PWA');
+        installButton.style.display = 'none';
       }
     });
     
