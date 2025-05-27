@@ -1,0 +1,21 @@
+{
+  "name": "Кредитный калькулятор",
+  "short_name": "Калькулятор",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ff9900",
+  "theme_color": "#ff9900",
+  "description": "Приложение для расчёта кредитных платежей",
+  "icons": [
+    {
+      "src": "logo192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

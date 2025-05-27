@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Кредитный калькулятор</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    body { font-family: Arial, sans-serif; background: #ff9900; color: #000; padding: 20px; }
+    .main { width: 400px; padding: 20px; background: #ffb347; border-radius: 10px; margin: 0 auto; }
+    .params, .result { background: #c0c000; padding: 10px; margin-bottom: 10px; border-radius: 10px; }
+    .input, select { width: 100%; padding: 5px; margin: 5px 0; }
+    .wrap { background: #ffe4b5; padding: 10px; border-radius: 10px; }
+    .result { background: #7ba428; color: white; margin-top: 15px; }
+    button { padding: 10px; background: #008000; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    .error { color: red; font-size: 12px; margin-top: -5px; margin-bottom: 5px; display: none; }
+    .github-button { 
+      display: block; 
+      margin: 20px auto; 
+      padding: 10px 15px; 
+      background: #24292e; 
+      color: white; 
+      text-decoration: none; 
+      border-radius: 5px; 
+      text-align: center; 
+      width: fit-content;
+    }
+    .github-button:hover { background: #2c3136; }
+  </style>
+</head>
+<body>
+  <div class="main">
+    <div class="params">
+      <h3>Параметры кредита</h3>
+      <label>Сумма кредита:</label>
+      <input type="number" id="summa" class="input" value="300000" min="1">
+      <div id="summaError" class="error">Сумма кредита должна быть положительным числом</div>
+
+      <label>Срок кредита:</label>
+      <select id="term" class="input">
+        <option value="12">12 мес.</option>
+        <option value="24" selected>24 мес.</option>
+        <option value="36">36 мес.</option>
+      </select>
+
+      <label>Процентная ставка (% в год):</label>
+      <input type="number" id="rate" class="input" value="8.5" min="0">
+      <div id="rateError" class="error">Процентная ставка не может быть отрицательной</div>
+    </div>
+
+    <div class="wrap">
+      <label>Первоначальный взнос:</label>
+      <input type="number" id="initialPayment" class="input" value="0" min="0">
+      <div id="initialPaymentError" class="error">Первоначальный взнос не может быть отрицательным</div>
+
+      <label>Единовременные комиссии (% от суммы кредита):</label>
+      <input type="number" id="oneTimeFee" class="input" value="0" min="0">
+      <div id="oneTimeFeeError" class="error">Комиссии не могут быть отрицательными</div>
+
+      <label>Ежемесячные комиссии (% от суммы кредита):</label>
+      <input type="number" id="monthlyFee" class="input" value="0" min="0">
+      <div id="monthlyFeeError" class="error">Комиссии не могут быть отрицательными</div>
+
+      <label>Вид платежа:</label>
+      <select id="paymentType" class="input">
+        <option value="annuity" selected>Аннуитетный</option>
+      </select>
+
+      <label>Начало выплат:</label>
+      <select id="month" class="input">
+        <option>Январь</option>
+        <option>Февраль</option>
+        <option>Март</option>
+        <option>Апрель</option>
+        <option selected>Май</option>
+        <option>Июнь</option>
+        <option>Июль</option>
+        <option>Август</option>
+        <option>Сентябрь</option>
+        <option>Октябрь</option>
+        <option>Ноябрь</option>
+        <option>Декабрь</option>
+      </select>
+      <select id="year" class="input">
+        <option>2024</option>
+        <option selected>2025</option>
+      </select>
+
+      <button onclick="calculate()">Рассчитать</button>
+    </div>
+
+    <div class="result" id="resultBlock"></div>
+  </div>
+
+  <a href="https://github.com/yourusername/credit-calculator" class="github-button" target="_blank">Скачать на GitHub</a>
+
+  <script>
+    function validateInput(inputId, errorId, errorMessage, minValue = 0) {
+      const input = document.getElementById(inputId);
+      const error = document.getElementById(errorId);
+      const value = parseFloat(input.value);
+      
+      if (isNaN(value) || value < minValue) {
+        error.textContent = errorMessage;
+        error.style.display = 'block';
+        input.focus();
+        return false;
+      } else {
+        error.style.display = 'none';
+        return true;
+      }
+    }
+
+    function calculate() {
+      // Проверка всех полей
+      const validations = [
+        validateInput('summa', 'summaError', 'Сумма кредита должна быть положительным числом', 1),
+        validateInput('rate', 'rateError', 'Процентная ставка не может быть отрицательной'),
+        validateInput('initialPayment', 'initialPaymentError', 'Первоначальный взнос не может быть отрицательным'),
+        validateInput('oneTimeFee', 'oneTimeFeeError', 'Комиссии не могут быть отрицательными'),
+        validateInput('monthlyFee', 'monthlyFeeError', 'Комиссии не могут быть отрицательными')
+      ];
+
+      // Если хотя бы одна проверка не прошла - прерываем выполнение
+      if (validations.some(valid => !valid)) return;
+
+      const loanAmount = parseFloat(document.getElementById('summa').value);
+      const term = parseInt(document.getElementById('term').value);
+      const rate = parseFloat(document.getElementById('rate').value);
+      const initialPayment = parseFloat(document.getElementById('initialPayment').value);
+      const oneTimeFee = parseFloat(document.getElementById('oneTimeFee').value);
+      const monthlyFee = parseFloat(document.getElementById('monthlyFee').value);
+
+      const principal = loanAmount - initialPayment;
+      const monthlyRate = rate / 12 / 100;
+
+      // Аннуитетный платёж
+      const annuityPayment = (principal * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -term));
+
+      // Комиссии
+      const oneTimeFeeAmount = loanAmount * oneTimeFee / 100;
+      const monthlyFeeAmount = loanAmount * monthlyFee / 100;
+      const totalMonthlyFees = monthlyFeeAmount * term;
+
+      const totalPayment = annuityPayment * term + oneTimeFeeAmount + totalMonthlyFees;
+      const overpayment = totalPayment - principal;
+      const fullCost = (overpayment / principal) * 100;
+      const yearlyCost = (fullCost / term) * 12;
+
+      document.getElementById('resultBlock').innerHTML = `
+        <p>Сумма ежемесячного платежа: ${annuityPayment.toFixed(2)} ₽</p>
+        <p>Ежемесячные комиссии: ${monthlyFeeAmount.toFixed(2)} ₽</p>
+        <p>Единовременные комиссии: ${oneTimeFeeAmount.toFixed(2)} ₽</p>
+        <p>Переплата по процентам за кредит: ${overpayment.toFixed(2)} ₽</p>
+        <p>Итоговая переплата за весь период: ${fullCost.toFixed(2)} %</p>
+        <p>Полная стоимость кредита, годовых: ${yearlyCost.toFixed(2)} %</p>
+      `;
+    }
+
+    // Регистрация Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('serviceworker.js')
+          .then(registration => {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          })
+          .catch(error => {
+            console.log('ServiceWorker registration failed: ', error);
+          });
+      });
+    }
+  </script>
+</body>
+</html>
