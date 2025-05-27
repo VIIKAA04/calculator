@@ -1,247 +1,198 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#ff9900">
-  <title>Кредитный калькулятор</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icons/icon-192x192.png">
-  <link rel="apple-touch-icon" href="icons/icon-192x192.png">
-  <style>
-    body { font-family: Arial, sans-serif; background: #ff9900; color: #000; padding: 20px; }
-    .main { width: 400px; padding: 20px; background: #ffb347; border-radius: 10px; margin: 0 auto; }
-    .params, .result { background: #c0c000; padding: 10px; margin-bottom: 10px; border-radius: 10px; }
-    .input, select { width: 100%; padding: 5px; margin: 5px 0; }
-    .wrap { background: #ffe4b5; padding: 10px; border-radius: 10px; }
-    .result { background: #7ba428; color: white; margin-top: 15px; }
-    button { padding: 10px; background: #008000; color: white; border: none; border-radius: 5px; cursor: pointer; }
-    .error { color: red; font-size: 12px; margin-top: -5px; margin-bottom: 5px; display: none; }
-    
-    /* Стиль кнопки GitHub */
-    #githubContainer {
-      text-align: center;
-      margin: 20px auto;
-    }
-    #githubButton {
-      display: inline-block;
-      padding: 10px 20px;
-      background: #24292e;
-      color: white;
-      text-decoration: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    #githubButton:hover {
-      background: #2c3136;
-    }
-    
-    /* Стиль для кнопки установки PWA */
-    #installContainer {
-      text-align: center;
-      margin: 10px 0;
-    }
-    #installButton {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      display: none;
-    }
-  </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ffffff">
+    <title>Калькулятор PWA</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        #installContainer {
+            text-align: center;
+            margin: 10px 0;
+        }
+        #installButton {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
+        }
+        .container {
+            max-width: 300px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        .screen {
+            background: #f0f0f0;
+            padding: 10px;
+            margin-bottom: 10px;
+            text-align: right;
+            font-size: 24px;
+            min-height: 30px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .button {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            margin: 5px;
+            line-height: 60px;
+            text-align: center;
+            background: #e0e0e0;
+            border-radius: 5px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .button:hover {
+            background: #d0d0d0;
+        }
+        .deist {
+            background: #f0a050;
+        }
+        .func {
+            background: #a0a0a0;
+            color: white;
+        }
+    </style>
 </head>
 <body>
-  <div id="installContainer">
-    <button id="installButton">Установить калькулятор</button>
-  </div>
-  
-  <div class="main">
-    <div class="params">
-      <h3>Параметры кредита</h3>
-      <label>Сумма кредита:</label>
-      <input type="number" id="summa" class="input" value="300000" min="1">
-      <div id="summaError" class="error">Сумма кредита должна быть положительным числом</div>
-
-      <label>Срок кредита:</label>
-      <select id="term" class="input">
-        <option value="12">12 мес.</option>
-        <option value="24" selected>24 мес.</option>
-        <option value="36">36 мес.</option>
-      </select>
-
-      <label>Процентная ставка (% в год):</label>
-      <input type="number" id="rate" class="input" value="8.5" min="0">
-      <div id="rateError" class="error">Процентная ставка не может быть отрицательной</div>
+    <div id="installContainer">
+        <button id="installButton">Установить калькулятор</button>
     </div>
-
-    <div class="wrap">
-      <label>Первоначальный взнос:</label>
-      <input type="number" id="initialPayment" class="input" value="0" min="0">
-      <div id="initialPaymentError" class="error">Первоначальный взнос не может быть отрицательным</div>
-
-      <label>Единовременные комиссии (% от суммы кредита):</label>
-      <input type="number" id="oneTimeFee" class="input" value="0" min="0">
-      <div id="oneTimeFeeError" class="error">Комиссии не могут быть отрицательными</div>
-
-      <label>Ежемесячные комиссии (% от суммы кредита):</label>
-      <input type="number" id="monthlyFee" class="input" value="0" min="0">
-      <div id="monthlyFeeError" class="error">Комиссии не могут быть отрицательными</div>
-
-      <label>Вид платежа:</label>
-      <select id="paymentType" class="input">
-        <option value="annuity" selected>Аннуитетный</option>
-      </select>
-
-      <label>Начало выплат:</label>
-      <select id="month" class="input">
-        <option>Январь</option>
-        <option>Февраль</option>
-        <option>Март</option>
-        <option>Апрель</option>
-        <option selected>Май</option>
-        <option>Июнь</option>
-        <option>Июль</option>
-        <option>Август</option>
-        <option>Сентябрь</option>
-        <option>Октябрь</option>
-        <option>Ноябрь</option>
-        <option>Декабрь</option>
-      </select>
-      <select id="year" class="input">
-        <option>2024</option>
-        <option selected>2025</option>
-      </select>
-
-      <button onclick="calculate()">Рассчитать</button>
-    </div>
-
-    <div class="result" id="resultBlock"></div>
-  </div>
-
-  <div id="githubContainer">
-    <a id="githubButton" href="https://github.com/yourusername/credit-calculator" target="_blank">Скачать на GitHub</a>
-  </div>
-
-  <script>
-    function validateInput(inputId, errorId, errorMessage, minValue = 0) {
-      const input = document.getElementById(inputId);
-      const error = document.getElementById(errorId);
-      const value = parseFloat(input.value);
-      
-      if (isNaN(value) || value < minValue) {
-        error.textContent = errorMessage;
-        error.style.display = 'block';
-        input.focus();
-        return false;
-      } else {
-        error.style.display = 'none';
-        return true;
-      }
-    }
-
-    function calculate() {
-      // Проверка всех полей
-      const validations = [
-        validateInput('summa', 'summaError', 'Сумма кредита должна быть положительным числом', 1),
-        validateInput('rate', 'rateError', 'Процентная ставка не может быть отрицательной'),
-        validateInput('initialPayment', 'initialPaymentError', 'Первоначальный взнос не может быть отрицательным'),
-        validateInput('oneTimeFee', 'oneTimeFeeError', 'Комиссии не могут быть отрицательными'),
-        validateInput('monthlyFee', 'monthlyFeeError', 'Комиссии не могут быть отрицательными')
-      ];
-
-      // Если хотя бы одна проверка не прошла - прерываем выполнение
-      if (validations.some(valid => !valid)) return;
-
-      const loanAmount = parseFloat(document.getElementById('summa').value);
-      const term = parseInt(document.getElementById('term').value);
-      const rate = parseFloat(document.getElementById('rate').value);
-      const initialPayment = parseFloat(document.getElementById('initialPayment').value);
-      const oneTimeFee = parseFloat(document.getElementById('oneTimeFee').value);
-      const monthlyFee = parseFloat(document.getElementById('monthlyFee').value);
-
-      const principal = loanAmount - initialPayment;
-      const monthlyRate = rate / 12 / 100;
-
-      // Аннуитетный платёж
-      const annuityPayment = (principal * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -term));
-
-      // Комиссии
-      const oneTimeFeeAmount = loanAmount * oneTimeFee / 100;
-      const monthlyFeeAmount = loanAmount * monthlyFee / 100;
-      const totalMonthlyFees = monthlyFeeAmount * term;
-
-      const totalPayment = annuityPayment * term + oneTimeFeeAmount + totalMonthlyFees;
-      const overpayment = totalPayment - principal;
-      const fullCost = (overpayment / principal) * 100;
-      const yearlyCost = (fullCost / term) * 12;
-
-      document.getElementById('resultBlock').innerHTML = `
-        <p>Сумма ежемесячного платежа: ${annuityPayment.toFixed(2)} ₽</p>
-        <p>Ежемесячные комиссии: ${monthlyFeeAmount.toFixed(2)} ₽</p>
-        <p>Единовременные комиссии: ${oneTimeFeeAmount.toFixed(2)} ₽</p>
-        <p>Переплата по процентам за кредит: ${overpayment.toFixed(2)} ₽</p>
-        <p>Итоговая переплата за весь период: ${fullCost.toFixed(2)} %</p>
-        <p>Полная стоимость кредита, годовых: ${yearlyCost.toFixed(2)} %</p>
-      `;
-    }
-
-    // PWA Installation
-    let deferredPrompt;
-    const installButton = document.getElementById('installButton');
     
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      installButton.style.display = 'block';
-      
-      // Автоматически показываем подсказку об установке через 3 секунды
-      setTimeout(() => {
-        if (deferredPrompt) {
-          deferredPrompt.prompt();
-          deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-              console.log('Пользователь принял предложение об установке');
-              installButton.style.display = 'none';
+    <div class="container">
+        <div class="screen"></div>
+        
+        <div class="button b1 bnum">1</div>
+        <div class="button b2 bnum">2</div>
+        <div class="button b3 bnum">3</div>
+        <div class="button b4 bnum">4</div>
+        <div class="button b5 bnum">5</div>
+        <div class="button b6 bnum">6</div>
+        <div class="button b7 bnum">7</div>
+        <div class="button b8 bnum">8</div>
+        
+        <div class="button b9 bnum">9</div>
+        <div class="button b0 bnum">0</div>
+        
+        <div class="button deist bplus">+</div>
+        <div class="button deist bmin">-</div>
+        <div class="button beq">=</div>
+        <div class="button deist bmul">*</div>
+        <div class="button deist bdiv">/</div>
+        <div class="button bpoint">.</div>
+
+        <div class="button func bC">C</div>
+        <div class="button func bCE">CE</div>
+        <div class="button func bMS">MS</div>
+        <div class="button func bMR">MR</div>
+    </div>
+
+    <script>
+        // Калькулятор
+        window.onload = Load;
+        let currDeistv = "";
+        let Arg = 0;
+        let Memory = 0;
+        
+        function Load() {
+            document.querySelectorAll(".bnum").forEach(el => el.onclick = NumClick);
+            document.querySelectorAll(".deist").forEach(el => el.onclick = DeistClick);
+            document.querySelectorAll(".func").forEach(el => el.onclick = FuncClick);
+            document.querySelector(".beq").onclick = RavnoClick;
+        }
+        
+        function FuncClick() {
+            let deist = this.innerHTML;
+            let screen = document.querySelector(".screen");
+            
+            if(deist == "C") {
+                screen.innerHTML = "";
+                currDeistv = "";
+                Arg = 0;
             }
-            deferredPrompt = null;
-          });
+            if(deist == "CE") {
+                screen.innerHTML = "";
+            }
+            if(deist == "MS") {
+                Memory = screen.innerHTML;
+            }
+            if(deist == "MR") {
+                screen.innerHTML = Memory;
+            }
         }
-      }, 3000);
-    });
-    
-    installButton.addEventListener('click', async () => {
-      if(deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if(outcome === 'accepted') {
-          installButton.style.display = 'none';
+        
+        function RavnoClick() {
+            if(currDeistv != "") {
+                let screen = document.querySelector(".screen");
+                let Brg = Number(screen.innerHTML);
+                Arg = Number(Arg);
+                let res = 0;
+                
+                switch(currDeistv) {
+                    case "+": res = Arg + Brg; break;
+                    case "-": res = Arg - Brg; break;
+                    case "*": res = Arg * Brg; break;
+                    case "/": res = Arg / Brg; break;
+                }
+                
+                screen.innerHTML = res;
+            }
         }
-        deferredPrompt = null;
-      }
-    });
-    
-    // Проверяем, запущено ли приложение как PWA
-    window.addEventListener('load', () => {
-      if (window.matchMedia('(display-mode: standalone)').matches) {
-        console.log('Запущено как PWA');
-        installButton.style.display = 'none';
-      }
-    });
-    
-    // Service Worker Registration
-    if('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('serviceworker.js')
-          .then(registration => {
-            console.log('ServiceWorker успешно зарегистрирован:', registration.scope);
-          })
-          .catch(error => {
-            console.log('Ошибка регистрации ServiceWorker:', error);
-          });
-      });
-    }
-  </script>
+        
+        function DeistClick() {
+            currDeistv = this.innerHTML;
+            let screen = document.querySelector(".screen");
+            Arg = screen.innerHTML;
+            screen.innerHTML = "";
+        }
+        
+        function NumClick() {
+            let num = this.innerHTML;
+            let screen = document.querySelector(".screen");
+            screen.innerHTML += num;
+        }
+
+        // PWA Installation
+        let deferredPrompt;
+        const installButton = document.getElementById('installButton');
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installButton.style.display = 'block';
+        });
+        
+        installButton.addEventListener('click', async () => {
+            if(deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if(outcome === 'accepted') {
+                    installButton.style.display = 'none';
+                }
+                deferredPrompt = null;
+            }
+        });
+        
+        // Service Worker Registration
+        if('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('serviceworker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker успешно зарегистрирован:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Ошибка регистрации ServiceWorker:', error);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>
